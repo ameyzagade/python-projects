@@ -1,4 +1,4 @@
-#compression and backup utility version 1
+#compression and backup utility version 2
 
 import zipfile
 import os, time
@@ -47,9 +47,11 @@ MyZipFile = zipfile.ZipFile( target_filepath, 'w')
 
 #adding files to the created zip
 #walk through the directory
-for filename in os.listdir(source_dir):
-	fpath = source_dir + os.sep + filename
-	MyZipFile.write(fpath, os.path.basename(fpath), zipfile.ZIP_DEFLATED)
+#this version deals with the files in subdirectory as well
+for root, dirs, filenames in os.walk(source_dir):
+		for filename in filenames:
+			fpath = root + os.sep + filename
+			MyZipFile.write(fpath, os.path.basename(fpath), zipfile.ZIP_DEFLATED)
 
 #close the zipfile object
 MyZipFile.close()
