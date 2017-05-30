@@ -1,7 +1,10 @@
-#compression and backup utility version 2
+#compression and backup utility version 3
+
 
 import zipfile
-import os, time
+import os
+import time
+
 
 #source directory path
 #enter your target directory path in between the single quotes
@@ -11,6 +14,7 @@ source_dir = ''
 #enter your target directory path in between the single quotes
 target_dir = ''
 
+
 #check if target directory exists
 if not os.path.exists(target_dir):
 	os.mkdir(target_dir)
@@ -19,22 +23,25 @@ if not os.path.exists(target_dir):
 	print('Target directory successfully created!', target_dir)
 
 
-#target path that is., subdirectory in the target directory
+#target path i.e, subdirectory in the target directory
 #it will be named according to current date in YYYYMMDD format
 target_path = target_dir + os.sep + time.strftime('%Y%m%d')
+
 
 #check if subdirectory exists, if not create one
 if not os.path.exists(target_path):
 	os.mkdir(target_path)
 
+
 #user comments, if any
-comment = input('Enter your comment >>')
+comment = input('Enter your comment >>>')
 
 #name of the zip file
 if(len(comment) == 0):
 	zip_name = time.strftime('%H%M%S') + '.zip'
 else:
 	zip_name = time.strftime('%H%M%S') + '_' + comment.replace(' ', '_') + '.zip'
+
 
 #absolute path of to be created target zip file
 target_filepath = target_path + os.sep + zip_name
@@ -45,15 +52,27 @@ print('Creating zip file...')
 MyZipFile = zipfile.ZipFile( target_filepath, 'w')
 
 
+#absolute path of the source directory
+parent_path = os.path.dirname(source_dir)
+
+
 #adding files to the created zip
 #walk through the directory
-#this version deals with the files in subdirectory as well
+#this versions deals with subdirectories as well
 for root, dirs, filenames in os.walk(source_dir):
-		for filename in filenames:
-			fpath = root + os.sep + filename
-			MyZipFile.write(fpath, os.path.basename(fpath), zipfile.ZIP_DEFLATED)
+	for dir_iterator in dirs:
+		absolute_path = root + os.sep + dir_iterator
+		relative_path = absolute_path.replace((parent_path) + '/', '')
+		MyZipFile.write(absolute_path, relative_path, zipfile.ZIP_DEFLATED)
+
+	for filename in filenames:
+		absolute_path = root + os.sep + filename
+		relative_path = absolute_path.replace((parent_path) + '/', '')
+		MyZipFile.write(absolute_path, relative_path, zipfile.ZIP_DEFLATED)
+
 
 #close the zipfile object
 MyZipFile.close()
 
+#display the location where zip file is stored
 print('ZIP file created successfully at', target_path)
