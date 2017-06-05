@@ -28,14 +28,14 @@ def main(argv):
 def zipfn(flag):
 	#source directory path
 	#enter your target directory path in between the single quotes
-	source_dir = '/home/ameyzagade/Pictures'
+	source_dir = ''
 	if flag == 1: 
 		print('source directory is at {0}'.format(source_dir))
 	
 
 	#target directory path
 	#enter your target directory path in between the single quotes
-	target_dir = '/home/ameyzagade/Backup'
+	target_dir = ''
 
 
 	#check if target directory exists
