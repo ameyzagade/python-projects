@@ -59,6 +59,7 @@ def zipfn(flag):
 	print('Add comments if, any, comments will be appended to name of the target file!')
 	comment = input('Enter your comment >>>')
 
+
 	#name of the zip file
 	if(len(comment) == 0):
 		zip_name = time.strftime('%H%M%S') + '.zip'
