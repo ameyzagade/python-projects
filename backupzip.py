@@ -1,7 +1,8 @@
-#compression and backup utility version 4
+#compression and backup utility version 4.5
 # while executing provide argument
 #	-v	verbose output
 #	-q	quiet output
+# defaults to quiet output on no arguments
 
 
 import zipfile
@@ -14,12 +15,17 @@ import getopt
 def main(argv):
 	# get arguments from command line
 	try:
-		opts, args = getopt.getopt(argv, "vq")
-		for opt, arg in opts:
-			if opt in ("-v"):
-				zipfn(1)
-			elif opt in ("-q"):
-				zipfn(0)
+		flag=0
+		if len(sys.argv) == 1:
+			zipfn(flag)
+		elif len(sys.argv) >=1:
+			opts, args = getopt.getopt(argv, "vq")
+			for opt, arg in opts:
+				if opt in ("-v"):
+					flag=1
+					zipfn(flag)
+				elif opt in ("-q"):
+					zipfn(flag)
 	except getopt.GetoptError:
 		print('Enter valid arguments')
 
@@ -30,7 +36,7 @@ def zipfn(flag):
 	#enter your target directory path in between the single quotes
 	source_dir = ''
 	if flag == 1: 
-		print('source directory is at {0}'.format(source_dir))
+		print('Source directory is at {0}'.format(source_dir))
 	
 
 	#target directory path
@@ -44,8 +50,9 @@ def zipfn(flag):
 		if flag == 1: 
 			print("Target directory isn't available.")
 			print("Creating target directory...")
-			print('Target directory successfully created!', target_dir)
+			print('Target directory successfully created!')
 
+	print('Target directory is at {0}'.format(target_dir))
 
 	#target path i.e, subdirectory in the target directory
 	#it will be named according to current date in YYYYMMDD format
@@ -55,6 +62,7 @@ def zipfn(flag):
 	#check if subdirectory exists, if not create one
 	if not os.path.exists(target_path):
 		os.mkdir(target_path)
+			
 
 	#user comments, if any
 	print('Add comments if, any, comments will be appended to name of the target file!')
