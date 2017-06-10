@@ -11,20 +11,6 @@ import time
 import argparse
 
 
-#create a parser object reference using ArgumentParser object to get arguments from command line
-parser = argparse.ArgumentParser(description='''Compression and Backup Utility version 5. Default\
-is quiet output for given directory. Add directories by typing their entire path after the arguments\
-to the script.''')
-
-#positional arguments
-
-#optional arguments
-#parser.add_argument('-', "--blank", action='store_true', help="Default action, quiet output.")
-parser.add_argument('-v', "--verbose", action='store_true', help="Verbose Output.")
-parser.add_argument('-q', "--quiet", action='store_true', help="Quiet Output.")
-args=parser.parse_args()
-
-
 #define zipfn function to build a zip
 def zipfn(flag):
 	#source directory path
@@ -106,7 +92,21 @@ def zipfn(flag):
 	#display the location where zip file is stored
 	print('ZIP file created successfully at', target_path)
 
+
 def main():
+	#create a parser object reference using ArgumentParser object to get arguments from command line
+	parser = argparse.ArgumentParser(description='''Compression and Backup Utility version 5.\
+	Default is quiet output for given directory. Add directories by typing their entire path after\
+	the arguments to the script.''')
+
+	#positional arguments
+
+	#optional arguments
+	#parser.add_argument('-', "--blank", action='store_true', help="Default action, quiet output.")
+	parser.add_argument('-v', "--verbose", action='store_true', help="Verbose Output.")
+	parser.add_argument('-q', "--quiet", action='store_true', help="Quiet Output.")
+	args=parser.parse_args()
+
 	flag=1
 	if args.verbose:
 		zipfn(flag)
@@ -115,6 +115,7 @@ def main():
 		zipfn(flag)
 	else:
 		print("Enter valid arguments")
+
 
 if __name__ == "__main__":
 	main()
