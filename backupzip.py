@@ -1,8 +1,8 @@
-#compression and backup utility version 5
+#compression and backup utility version 6
 # while executing provide argument
 #	-v, --verbose	verbose output
 #	-q, --quiet	quiet output
-# defaults to quiet output on no arguments
+# defaults to quiet output on no arguments(to be implemented)
 
 
 import zipfile
@@ -12,17 +12,17 @@ import argparse
 
 
 #define zipfn function to build a zip
-def zipfn(flag):
+def zipfn(flag, dr_list):
 	#source directory path
 	#enter your target directory path in between the single quotes
-	source_dir = ''
+	source_dir = '/home/ameyzagade/Pictures'
 	if flag == 1: 
 		print('Source directory is at {0}'.format(source_dir))
 	
 
 	#target directory path
 	#enter your target directory path in between the single quotes
-	target_dir = ''
+	target_dir = '/home/ameyzagade/Backup'
 
 
 	#check if target directory exists
@@ -61,34 +61,51 @@ def zipfn(flag):
 	if flag == 1: 
 		print('Compressed file will be saved at {}'.format(target_filepath))
 
-
 	#creating a zipfile object variable
 	if flag == 1: 
 		print('Creating zip file...')
-	MyZipFile = zipfile.ZipFile( target_filepath, 'w')
+	MyZipFile = zipfile.ZipFile(target_filepath, 'w')
 
 
-	#absolute path of the source directory
-	parent_path = os.path.dirname(source_dir)
+	if (dr_list is None) or (len(dr_list) == 0):
+		#absolute path of the source directory
+		parent_path = os.path.dirname(source_dir)
 
+		#adding files to the created zip
+		#walk through the directory and subdirectories as well
+		for root, dirs, filenames in os.walk(source_dir):
+			for dir_iterator in dirs:
+				absolute_path = root + os.sep + dir_iterator
+				relative_path = absolute_path.replace((parent_path) + '/', '')
+				MyZipFile.write(absolute_path, relative_path, zipfile.ZIP_DEFLATED)
+	
+			for filename in filenames:
+				absolute_path = root + os.sep + filename
+				relative_path = absolute_path.replace((parent_path) + '/', '')
+				MyZipFile.write(absolute_path, relative_path, zipfile.ZIP_DEFLATED)
 
-	#adding files to the created zip
-	#walk through the directory and subdirectories as well
-	for root, dirs, filenames in os.walk(source_dir):
-		for dir_iterator in dirs:
-			absolute_path = root + os.sep + dir_iterator
-			relative_path = absolute_path.replace((parent_path) + '/', '')
-			MyZipFile.write(absolute_path, relative_path, zipfile.ZIP_DEFLATED)
+	elif (len(dr_list) >= 1):
+		#adding files to the created zip
+		#walk through the directory and subdirectories as well for all source directories
+		source_directories = [source_dir, ]
+		source_directories.extend(dr_list)
 
-		for filename in filenames:
-			absolute_path = root + os.sep + filename
-			relative_path = absolute_path.replace((parent_path) + '/', '')
-			MyZipFile.write(absolute_path, relative_path, zipfile.ZIP_DEFLATED)
-
-
+		for source in source_directories:
+			parent_path = os.path.dirname(source)
+			for root, dirs, filenames in os.walk(source):
+				for dir_iterator in dirs:
+					absolute_path = root + os.sep + dir_iterator
+					relative_path = absolute_path.replace((parent_path) + '/', '')
+					MyZipFile.write(absolute_path, relative_path, zipfile.ZIP_DEFLATED)
+	
+				for filename in filenames:
+					absolute_path = root + os.sep + filename
+					relative_path = absolute_path.replace((parent_path) + '/', '')
+					MyZipFile.write(absolute_path, relative_path, zipfile.ZIP_DEFLATED)
+	
 	#close the zipfile object
 	MyZipFile.close()
-	
+		
 	#display the location where zip file is stored
 	print('ZIP file created successfully at', target_path)
 
@@ -99,19 +116,20 @@ def main():
 	Default is quiet output for given directory. Add directories by typing their entire path after\
 	the arguments to the script.''')
 
-	#positional arguments
-
 	#optional arguments
-	#parser.add_argument('-', "--blank", action='store_true', help="Default action, quiet output.")
+	parser.add_argument('-d', nargs="*", help="name of directories to be added to the zip")
 	parser.add_argument('-v', "--verbose", action='store_true', help="Verbose Output.")
 	parser.add_argument('-q', "--quiet", action='store_true', help="Quiet Output.")
-	args=parser.parse_args()
+	args=parser.parse_args()	
 
-
+	# pass the list of directories from command line if any
+	flag=0
 	if args.verbose:
-		zipfn(flag=1)
+		flag=1
+		zipfn(flag, args.d)
 	elif args.quiet:
-		zipfn(flag=0)
+		zipfn(flag, args.d)
+	#report when none of the optional arguments are entered
 	else:
 		print("Enter valid arguments")
 
