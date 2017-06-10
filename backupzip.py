@@ -107,12 +107,11 @@ def main():
 	parser.add_argument('-q', "--quiet", action='store_true', help="Quiet Output.")
 	args=parser.parse_args()
 
-	flag=1
+
 	if args.verbose:
-		zipfn(flag)
+		zipfn(flag=1)
 	elif args.quiet:
-		flag=0
-		zipfn(flag)
+		zipfn(flag=0)
 	else:
 		print("Enter valid arguments")
 
