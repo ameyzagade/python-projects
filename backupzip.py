@@ -12,7 +12,9 @@ import argparse
 
 
 #create a parser object reference using ArgumentParser object to get arguments from command line
-parser = argparse.ArgumentParser(description='''Compression and Backup Utility version 5. Default		is quiet output for given directory. Add directories by typing their entire path after the 		arguments to the script.''')
+parser = argparse.ArgumentParser(description='''Compression and Backup Utility version 5. Default\
+is quiet output for given directory. Add directories by typing their entire path after the arguments\
+to the script.''')
 
 #positional arguments
 
