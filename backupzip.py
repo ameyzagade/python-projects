@@ -1,47 +1,40 @@
-#compression and backup utility version 4.5
+#compression and backup utility version 5
 # while executing provide argument
-#	-v	verbose output
-#	-q	quiet output
+#	-v, --verbose	verbose output
+#	-q, --quiet	quiet output
 # defaults to quiet output on no arguments
 
 
 import zipfile
 import os
 import time
-import sys
-import getopt
+import argparse
 
 
-def main(argv):
-	# get arguments from command line
-	try:
-		flag=0
-		if len(sys.argv) == 1:
-			zipfn(flag)
-		elif len(sys.argv) >=1:
-			opts, args = getopt.getopt(argv, "vq")
-			for opt, arg in opts:
-				if opt in ("-v"):
-					flag=1
-					zipfn(flag)
-				elif opt in ("-q"):
-					zipfn(flag)
-	except getopt.GetoptError:
-		print('Enter valid arguments')
+#create a parser object reference using ArgumentParser object to get arguments from command line
+parser = argparse.ArgumentParser(description='''Compression and Backup Utility version 5. Default		is quiet output for given directory. Add directories by typing their entire path after the 		arguments to the script.''')
+
+#positional arguments
+
+#optional arguments
+#parser.add_argument('-', "--blank", action='store_true', help="Default action, quiet output.")
+parser.add_argument('-v', "--verbose", action='store_true', help="Verbose Output.")
+parser.add_argument('-q', "--quiet", action='store_true', help="Quiet Output.")
+args=parser.parse_args()
 
 
-#define zipfn function 
+#define zipfn function to build a zip
 def zipfn(flag):
 	#source directory path
 	#enter your target directory path in between the single quotes
-	source_dir = ''
+	source_dir = '/home/ameyzagade/Pictures'
 	if flag == 1: 
 		print('Source directory is at {0}'.format(source_dir))
 	
 
 	#target directory path
 	#enter your target directory path in between the single quotes
-	target_dir = ''
+	target_dir = '/home/ameyzagade/Backup'
 
 
 	#check if target directory exists
@@ -51,8 +44,8 @@ def zipfn(flag):
 			print("Target directory isn't available.")
 			print("Creating target directory...")
 			print('Target directory successfully created!')
-
-	print('Target directory is at {0}'.format(target_dir))
+	if flag == 1:
+		print('Target directory is at {0}'.format(target_dir))
 
 	#target path i.e, subdirectory in the target directory
 	#it will be named according to current date in YYYYMMDD format
@@ -111,7 +104,15 @@ def zipfn(flag):
 	#display the location where zip file is stored
 	print('ZIP file created successfully at', target_path)
 
-
+def main():
+	flag=1
+	if args.verbose:
+		zipfn(flag)
+	elif args.quiet:
+		flag=0
+		zipfn(flag)
+	else:
+		print("Enter valid arguments")
 
 if __name__ == "__main__":
-	main(sys.argv[1:])
+	main()
