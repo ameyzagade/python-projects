@@ -32,6 +32,7 @@ def zipfn(flag, dr_list):
 			print("Target directory isn't available.")
 			print("Creating target directory...")
 			print('Target directory successfully created!')
+
 	if flag == 1:
 		print('Target directory is at {0}'.format(target_dir))
 
@@ -66,7 +67,8 @@ def zipfn(flag, dr_list):
 		print('Creating zip file...')
 	MyZipFile = zipfile.ZipFile(target_filepath, 'w')
 
-
+	
+	#if subdirectories are mentioned at terminal if any
 	if (dr_list is None) or (len(dr_list) == 0):
 		#absolute path of the source directory
 		parent_path = os.path.dirname(source_dir)
