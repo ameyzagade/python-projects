@@ -44,10 +44,7 @@ def makezip(dir_list):
 	if not os.path.exists(target_dir):
 		os.mkdir(target_dir)
 
-
-	zip_name = 'backup.zip'
-
-	target_fullpath = target_dir + os.sep + zip_name
+	target_fullpath = target_dir + os.sep + 'backup.zip'
 
 	MyZipFile = zipfile.ZipFile(target_fullpath, 'w')
 
