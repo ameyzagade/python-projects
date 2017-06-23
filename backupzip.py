@@ -1,140 +1,74 @@
-#compression and backup utility version 6
-# while executing provide argument
-#	-v, --verbose	verbose output
-#	-q, --quiet	quiet output
-# defaults to quiet output on no arguments(to be implemented)
-
+# backup utility version 6
+# while executing provide atleast one directory to backup
 
 import zipfile
 import os
 import time
 import argparse
+import getpass
 
 
-#define zipfn function to build a zip
-def zipfn(flag, dr_list):
-	#source directory path
-	#enter your target directory path in between the single quotes
-	source_dir = ''
-	if flag == 1: 
-		print('Source directory is at {0}'.format(source_dir))
-	
+def getdir():
+	# parser object to get arguments from terminal
+	parser = argparse.ArgumentParser(''' Backup Utility version 6. Add directories to be zipped and for backup. ''')
 
-	#target directory path
-	#enter your target directory path in between the single quotes
-	target_dir = ''
+	# one optional argument to backup
+	parser.add_argument('-d', nargs="*", help="name of directories to be zipped.")
+
+	args = parser.parse_args()	
+
+	# check for user passes atleast one directory as an argument
+	if (args.d is not None) and (len(args.d) >=1):
+		makezip(args.d)
+	else:
+		print('Enter atleast one directory.')
+
+# building a zip to store source directories
+def makezip(dir_list):
+	# default target directory will always be at /home/username for the current user
+	target_dir = '/home/' + getpass.getuser() + os.sep + 'Backup' + time.strftime('_%Y-%m-%d_%H:%M:%S')
+	print('Default Target Directory is', target_dir)
+
+	# option to change target directory
+	decide = input('Do you wish to change default target directory? [y/n]')
+	if (decide == 'y') or (decide == 'Y'):
+		new_loc = input('Enter new target directory location:')
+		target_dir = new_loc + os.sep + 'Backup' + time.strftime('_%Y-%m-%d_%H:%M:%S')
+		print('New Target Directory is', target_dir)
+	elif (decide == 'n') or (decide == 'N'):
+		pass
+	else:
+		print('improper choice. Default target directory will be used.')
 
 
-	#check if target directory exists
 	if not os.path.exists(target_dir):
 		os.mkdir(target_dir)
-		if flag == 1: 
-			print("Target directory isn't available.")
-			print("Creating target directory...")
-			print('Target directory successfully created!')
-
-	if flag == 1:
-		print('Target directory is at {0}'.format(target_dir))
-
-	#target path i.e, subdirectory in the target directory
-	#it will be named according to current date in YYYYMMDD format
-	target_path = target_dir + os.sep + time.strftime('%Y%m%d')
 
 
-	#check if subdirectory exists, if not create one
-	if not os.path.exists(target_path):
-		os.mkdir(target_path)
-			
+	zip_name = 'backup.zip'
 
-	#user comments, if any
-	print('Add comments if, any, comments will be appended to name of the target file!')
-	comment = input('Enter your comment >>>')
+	target_fullpath = target_dir + os.sep + zip_name
 
-	#name of the zip file
-	if(len(comment) == 0):
-		zip_name = time.strftime('%H%M%S') + '.zip'
-	else:
-		zip_name = time.strftime('%H%M%S') + '_' + comment.replace(' ', '_') + '.zip'
+	MyZipFile = zipfile.ZipFile(target_fullpath, 'w')
 
-
-	#absolute path of to be created target zip file
-	target_filepath = target_path + os.sep + zip_name
-	if flag == 1: 
-		print('Compressed file will be saved at {}'.format(target_filepath))
-
-	#creating a zipfile object variable
-	if flag == 1: 
-		print('Creating zip file...')
-	MyZipFile = zipfile.ZipFile(target_filepath, 'w')
-
-	
-	#if subdirectories are mentioned at terminal if any
-	if (dr_list is None) or (len(dr_list) == 0):
-		#absolute path of the source directory
-		parent_path = os.path.dirname(source_dir)
-
-		#adding files to the created zip
-		#walk through the directory and subdirectories as well
-		for root, dirs, filenames in os.walk(source_dir):
+	# walk through the directory and subdirectories as well for all source directories
+	for source in dir_list:
+		parent_path = os.path.dirname(source)
+		for root, dirs, files in os.walk(source):
 			for dir_iterator in dirs:
 				absolute_path = root + os.sep + dir_iterator
 				relative_path = absolute_path.replace((parent_path) + '/', '')
 				MyZipFile.write(absolute_path, relative_path, zipfile.ZIP_DEFLATED)
 	
-			for filename in filenames:
+			for filename in files:
 				absolute_path = root + os.sep + filename
 				relative_path = absolute_path.replace((parent_path) + '/', '')
 				MyZipFile.write(absolute_path, relative_path, zipfile.ZIP_DEFLATED)
 
-	elif (len(dr_list) >= 1):
-		#adding files to the created zip
-		#walk through the directory and subdirectories as well for all source directories
-		source_directories = [source_dir, ]
-		source_directories.extend(dr_list)
-
-		for source in source_directories:
-			parent_path = os.path.dirname(source)
-			for root, dirs, filenames in os.walk(source):
-				for dir_iterator in dirs:
-					absolute_path = root + os.sep + dir_iterator
-					relative_path = absolute_path.replace((parent_path) + '/', '')
-					MyZipFile.write(absolute_path, relative_path, zipfile.ZIP_DEFLATED)
-	
-				for filename in filenames:
-					absolute_path = root + os.sep + filename
-					relative_path = absolute_path.replace((parent_path) + '/', '')
-					MyZipFile.write(absolute_path, relative_path, zipfile.ZIP_DEFLATED)
-	
-	#close the zipfile object
 	MyZipFile.close()
-		
-	#display the location where zip file is stored
-	print('ZIP file created successfully at', target_path)
-
 
 def main():
-	#create a parser object reference using ArgumentParser object to get arguments from command line
-	parser = argparse.ArgumentParser(description='''Compression and Backup Utility version 5.\
-	Default is quiet output for given directory. Add directories by typing their entire path after\
-	the arguments to the script.''')
-
-	#optional arguments
-	parser.add_argument('-d', nargs="*", help="name of directories to be added to the zip")
-	parser.add_argument('-v', "--verbose", action='store_true', help="Verbose Output.")
-	parser.add_argument('-q', "--quiet", action='store_true', help="Quiet Output.")
-	args=parser.parse_args()	
-
-	# pass the list of directories from command line if any
-	flag=0
-	if args.verbose:
-		flag=1
-		zipfn(flag, args.d)
-	elif args.quiet:
-		zipfn(flag, args.d)
-	#report when none of the optional arguments are entered
-	else:
-		print("Enter valid arguments")
-
+	getdir()
 
 if __name__ == "__main__":
 	main()
