@@ -2,7 +2,7 @@
 # get your unique api key and put wherever mentioned
 # the api key will be an 19-digit alphanumeric key
 
-import json, requests, subprocess
+import json, requests
 import gi
 gi.require_version('Notify', '0.7')
 from gi.repository import GObject
@@ -119,11 +119,11 @@ def main():
 				if (key == search_key):
 					score_list.append(value)
 
-			# eliminating duplicates
-			score_list = list(set(score_list))
+	# eliminating duplicates
+	score_list = list(set(score_list))
 
-			#desktop popup for information on matches
-			sendmessage(score_list)
+	#desktop popup for information on matches
+	sendmessage(score_list)
 
 
 if __name__ == "__main__":
