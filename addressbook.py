@@ -210,6 +210,7 @@ def main():
 				addr.modify()
 			elif choice == 'q' or choice == 'Q':
 				print('Exiting ...')
+				loop = False
 				break
 			else:
 				raise InvalidInputError(choice)
