@@ -1,224 +1,227 @@
+import pickle
+import os
+
 class PersonInfo:
-	def store_details(self, contactname, email, contactnumber, relation):
+	def __init__(self, contactname, contactnumber, email):
 		self.contactname = contactname
+		self.contactnumber = int(contactnumber)
 		self.email = email
+
+	def change_name(self, contactname):
+		self.contactname = contactname
+
+	def change_email(self, email):
+		self.email = email
+
+	def change_number(self, contactnumber):
 		self.contactnumber = contactnumber
-		self.relation = relation
 
-	def print_details(self):
-		print('Contact Name:', self.contactname)
-		print('Email:', self.email)
-		print('Contact Number:', self.contactnumber)
-		print('Relation:', self.relation)
+# global dictionary
+# initialized at script startup
+people = dict()
 
+# filename
+filename = 'addressbook.data'
 
-# exception classes
-class InvalidInputError(Exception):
-	def __init__(self, entered_key):
-		Exception.__init__(self)
-		self.entered_key = entered_key
+def add_contact(filename, add_object):
+	# check if file does not exist
+	if not os.path.isfile(filename):
+		with open(filename, 'wb') as file:
+			pickle.dump(add_object, file)
+	else:		
+		unpickle = list()
+		with open(filename, 'rb') as file:
+			while True:
+				try:
+					unpickle.append(pickle.load(file))
+				except EOFError:
+					break
 
-class NoContactsException(Exception):
-	def __init__(self):
-		Exception.__init__(self)
-		self.needed = 1
+		# construct a dictionary of contact names
+		for each_obj in unpickle:
+			people[each_obj.contactname] = each_obj
 
-class addressbook:
-	Person_details = dict()
-	
-	def add(self):
-		self.add_more = True
-
-		while self.add_more:
-			print('\nEnter contact details--')
-			self.contactname = input('Enter Name: ')
-			self.email = input('Enter Email: ')
-			self.contactnumber = input('Enter Phone Number: ')
-			self.relation = input('Enter Relation: ')
-
-			obj = PersonInfo()
-			obj.store_details(self.contactname, self.email, int(self.contactnumber), self.relation)
-
-			print()
-			self.Person_details[self.contactname] = obj
-
-			print('Contact Added:', self.contactname)
-
-			try:
-				self.inp = input('Do you wish to add another contact? [y/n] ')
-				if (self.inp == 'y') or (self.inp == 'Y'):
-					self.add_more = True
-				elif (self.inp == 'n') or (self.inp == 'N'):
-					self.add_more = False
-				else:
-					raise InvalidInputError(self.inp)
-			except InvalidInputError as ex:
-				print(("InvalidInputError: Entered option '{}' is invalid.").format(ex.entered_key))
-				break
+		# check if contact name exists in address book
+		search_key = add_object.contactname
+		if search_key not in people:
+			people[search_key] = add_object
+			with open(filename, 'ab') as file:
+				pickle.dump(add_object, file)
+			print('Contact Added!\n')
+		else:
+			inp = input(('Contact Name already exists. Do you wish to modify the contact:{}? [y/n]').format(search_key))
+			if (inp == 'y') or (inp == 'Y'):
+				modify_contact(filename, search_key)
+			elif (inp == 'n') or (inp == 'N'):
+				pass
 			else:
-				if not self.add_more:
-					break
-				print()
+				print('Invalid Input. Modify operation aborted.')			
 	
-	def browse(self):
-		try:
-			if not bool(self.Person_details):
-				raise NoContactsException()
-		except NoContactsException as e:
-			print(("\nNoContactsException: No contacts in the Address Book. Atleast need {0} contact.\n").format(e.needed))
+def del_contact(filename, del_str):
+	if not os.path.isfile(filename):
+		print('File does not exist!')
+	else:
+		unpickle = list()
+		with open(filename, 'rb') as file:
+			while True:
+				try:
+					unpickle.append(pickle.load(file))
+				except EOFError:
+					break
+
+		if len(unpickle) == 0:
+			print('Address Book is empty.')
 		else:
-			print('\nADDRESS BOOK')
-		finally:
-			for key, value in sorted(self.Person_details.items()):
-				print('Contact Details for', value.contactname)
-				value.print_details()
-				print()
+			try:
+				del people[del_str]
+			except KeyError:
+				print('Contact Not Found!')
+			else:
+				print(('Contact {} deleted successfully.\n').format(del_str))
+				# empty the file
+				with open(filename, 'wb') as file:
+					file.seek(0)
+					file.truncate()
+					# update the file
+					for key, value in people.items():
+						pickle.dump(value, file)						
 
-	def search(self):
-		self.srch_name = input("\nEnter name of the contact to search it's details: ")
-		self.found = False
-
-		for key,value in self.Person_details.items():
-			if key == self.srch_name:
-				self.found = True
-				print()
-				value.print_details()
-				print()
-		if not self.found:
-			print('Details for contact name', self.srch_name, 'does not exist in the address book.')
-			print()
-
-	def modify(self):
-		self.mod_name = input('Name of the contact to be modified: ')
-		self.found = False
-
-		for key, value in self.Person_details.items():
-			if key == self.mod_name:
-				self.found = True
-				print('Modify details for contact, ', key)
-
-				print('Name:', value.contactname)
+def browse_addrbook(filename):
+	try:
+		unpickle = list()
+		with open(filename, 'rb') as file:
+			while True:
 				try:
-					self.inp = input('Do you wish to modify Contact Name? [y/n] ')
-					if (self.inp == 'y') or (self.inp == 'Y'):
-						temp = input('Enter new name: ')
-						value.contactname = temp
-						key = temp
-					elif (self.inp == 'n') or (self.inp == 'N'):
-						pass
-					else:
-						raise InvalidInputError(self.inp)
-				except InvalidInputError as ex:
-					print(("InvalidInputError: Entered option '{}' is invalid.").format(ex.entered_key))
+					unpickle.append(pickle.load(file))
+				except EOFError:
 					break
-				else:
-					pass
+	except FileNotFoundError:
+		print('\nAddress Book does not exist!\n')
+	else:
+		for each_obj in unpickle:
+			print('\nContact Name:', each_obj.contactname)
+			print('Contact number:', each_obj.contactnumber)
+			print('Email:', each_obj.email, '\n')
 
-				print()
-				print('Email:', value.email)
+def modify_contact(filename, inp_str):
+	if not os.path.isfile(filename):
+		print('File does not exist!')
+	else:
+		unpickle = list()
+		with open(filename, 'rb') as file:
+			while True:
 				try:
-					self.inp = input('Do you wish to modify Email? [y/n] ')
-					if (self.inp == 'y') or (self.inp == 'Y'):
-						temp = input('Enter new email: ')
-						value.email = temp
-					elif (self.inp == 'n') or (self.inp == 'N'):
-						pass
-					else:
-						raise InvalidInputError(self.inp)
-				except InvalidInputError as ex:
-					print(("InvalidInputError: Entered option '{}' is invalid.").format(ex.entered_key))
+					unpickle.append(pickle.load(file))
+				except EOFError:
 					break
-				else:
-					pass		
 
-				print()
-				print('Contact Number:', value.contactnumber)
-				try:
-					self.inp = input('Do you wish to modify Contact Number? [y/n] ')
-					if (self.inp == 'y') or (self.inp == 'Y'):
-						temp = input('Enter new number: ')
-						value.contactnumber = temp
-					elif (self.inp == 'n') or (self.inp == 'N'):
-						pass
-					else:
-						raise InvalidInputError(self.inp)
-				except InvalidInputError as ex:
-					print(("InvalidInputError: Entered option '{}' is invalid.").format(ex.entered_key))
-					break
-				else:
-					pass
-
-				print()
-				print('Relation:', value.relation)
-				try:
-					self.inp = input('Do you wish to modify Relation? [y/n] ')
-					if (self.inp == 'y') or (self.inp == 'Y'):
-						temp = input('Enter relationr: ')
-						value.relation = temp
-					elif (self.inp == 'n') or (self.inp == 'N'):
-						pass
-					else:
-						raise InvalidInputError(self.inp)
-				except InvalidInputError as ex:
-					print(("InvalidInputError: Entered option '{}' is invalid.").format(ex.entered_key))
-					break
-				else:
-					pass
-
-		print()
-		if self.found:
-			for key, value in self.Person_details.items():
-				if key == value.contactname:
-					value.print_details()
-					print()
+		if len(unpickle) == 0:
+			print('Address Book is empty.')
 		else:
-			print('Contact name', self.mod_name, 'does not exist in the address book.')
+			if inp_str in people:
+				print(('Modify details for contact: {}').format(inp_str))
+				obj = people.get(inp_str)
 
-	def delete(self):
-		self.rem_name = input("\nEnter name of the contact to remove it: ")
-		self.found = False
+				print('Name:', obj.contactname)
+				get_inp = input('Do you wish to modify Contact Name? [y/n] ')
+				if (get_inp == 'y') or (get_inp == 'Y'):
+					obj.change_name(input('Enter new name: '))						
+				elif (get_inp == 'n') or (get_inp == 'N'):
+					pass
+				else:
+					print('Entered option {} is invalid. Name unchanged.')
 
-		for key, value in self.Person_details.items():
-			if key == self.rem_name:
-				self.found = True
+				print('Number:', obj.contactnumber)
+				get_inp = input('Do you wish to modify Contact Number? [y/n] ')
+				if (get_inp == 'y') or (get_inp == 'Y'):
+					obj.change_number(input('Enter new number: '))						
+				elif (get_inp == 'n') or (get_inp == 'N'):
+					pass
+				else:
+					print('Entered option {} is invalid. Number unchanged.')
 
-		if self.found:
-			del self.Person_details[key]
-			print('Details for', self.rem_name, 'deleted!\n')
+				print('Email:', obj.email)
+				get_inp = input('Do you wish to modify Email? [y/n] ')
+				if (get_inp == 'y') or (get_inp == 'Y'):
+					obj.change_email(input('Enter new email: '))						
+				elif (get_inp == 'n') or (get_inp == 'N'):
+					pass
+				else:
+					print('Entered option {} is invalid. Email unchanged.')
+
+				# print new values of modified contact
+				print('\nModified Contact-')
+				print('Contact Name:', obj.contactname)
+				print('Contact number:', obj.contactnumber)
+				print('Email:', obj.email)
+				print()
+
+				# pushing new values to dictionary and data file
+				people[obj.contactname] = people.pop(inp_str)
+				with open(filename, 'wb') as file:
+					# empty the file
+					file.seek(0)
+					file.truncate()
+					# write contents to the file
+					for key, value in people.items():
+						pickle.dump(value, file)	
+			else:
+				pass
+
+def search_contact(filename, search_str):
+	if not os.path.isfile(filename):
+		print('File does not exist!')
+	else:
+		unpickle = list()
+		with open(filename, 'rb') as file:
+			while True:
+				try:
+					unpickle.append(pickle.load(file))
+				except EOFError:
+					break
+
+		if len(unpickle) == 0:
+			print('Address Book is empty.')
 		else:
-			print(self.rem_name, 'not found!\n')
-
+			if search_str in people:
+				print('Contact Found!')
+				obj = people.get(search_str)
+				print('Contact Name', obj.contactname)
+				print('Contact Number', obj.contactnumber)
+				print('Email', obj.email)
+			else:
+				print('Contact Not Found!')
 
 def main():
 	print('ADDRESS BOOK')
-
-	loop = True
-	while loop:
-		try:
-			choice = input('1. Browse\n2. Add\n3. Delete\n4. Search\n5. Modify\nq|Q. Exit\nEnter Option: ')
-			addr = addressbook()
-
-			if choice == '1':
-				addr.browse()
-			elif choice == '2':
-				addr.add()
-			elif choice == '3':
-				addr.delete()
-			elif choice == '4':
-				addr.search()
-			elif choice == '5':
-				addr.modify()
-			elif choice == 'q' or choice == 'Q':
-				print('Exiting ...')
-				loop = False
-				break
-			else:
-				raise InvalidInputError(choice)
-		except InvalidInputError as excep:
-			print(('InvalidInputError: Entered option {} is invalid.\n').format(excep.entered_key))
+	
+	while True:
+		choice = input('1. Browse\n2. Add\n3. Delete\n4. Search\n5. Modify\nq|Q. Exit\nEnter Option: ')
+		if choice == '1':
+			browse_addrbook(filename)
+		elif choice == '2':
+			# check here if contact is already in dict
+			name = input('\nEnter name of the person: ')
+			number = input('Enter contact number of the person: ')
+			email = input('Enter email of the person: ')
+			Person = PersonInfo(name, number, email)
+			add_contact(filename, Person)
+		elif choice == '3':
+			name = input('Name of the person to be deleted: ')
+			del_contact(filename, name)
+		elif choice == '4':
+			name = input('Name of the person to be searched in the address book: ')
+			search_contact(filename, name)
+		elif choice == '5':
+			name = input('Enter name of the contact to be modified: ')
+			modify_contact(filename, name)
+		elif (choice == 'q') or (choice == 'Q'):
+			print('Exiting ...')
+			break
 		else:
-			pass
+			print(('InvalidInputError: Entered option {} is invalid.\n').format(choice))
+	else:
+		pass
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
 	main()
