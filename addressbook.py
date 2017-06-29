@@ -3,20 +3,23 @@ import pickle
 
 # PersonInfo object
 class PersonInfo:
-	def __init__(self, contactname, contactnumber, email):
+	def __init__(self, contactname, contactnumber, email, tag):
 		self.name = contactname
 		self.number = int(contactnumber)
 		self.email = email
+		self.tag = tag
 
 	def change_name(self, contactname):
 		self.name = contactname
 
 	def change_number(self, contactnumber):
-		self.number = contactnumber
+		self.number = int(contactnumber)
 
 	def change_email(self, email):
 		self.email = email
 
+	def change_tag(self, tag):
+		self.tag = tag
 
 filename = 'addressbook.data'
 
@@ -67,7 +70,7 @@ def add_contact(contact_object):
 			temp_dict = update_dict(flag, contact_object, None)
 			with open(filename, 'ab') as file:
 				pickle.dump(contact_object, file)
-			print()		
+			print('Contact added successfully!\n')		
 		else:
 			get_input = input(('Contact Name already exists. Do you wish to modify the contact:{}? [y/n]').format(search_key))
 			if (get_input == 'y') or (get_input == 'Y'):
@@ -137,21 +140,30 @@ def modify_contact(input_string):
 	else:
 		if get_obj is not None:
 			temp_dict = create_dict()
-			# needs some working
+			# new values for contact
 			get_input = input('\nEnter new name: ')
 			get_obj.change_name(get_input)
 
-			get_input = input('Enter new number: ')
-			get_obj.change_number(get_input)
+			try:
+				get_input = input('Enter new number: ')
+				val = int(get_input)
+			except ValueError:
+				print('Not a valid number! Number unchanged')
+				get_obj.change_number(get_obj.number)
+			else:
+				get_obj.change_number(val)
 
 			get_input = input('Enter new email: ')
 			get_obj.change_email(get_input)
 
+			get_input = input('Enter new tag: ')
+			get_obj.change_tag(get_input)
 			# print new values of modified contact
 			print('\nModified Contact-')
 			print('Contact Name:', get_obj.name)
 			print('Contact number:', get_obj.number)
 			print('Email:', get_obj.email)
+			print('Tag:', get_obj.tag)
 			print()
 
 			# push modified values to dict and file
@@ -174,7 +186,7 @@ def browse_addrbook():
 				except EOFError:
 					break
 	except FileNotFoundError:
-		print('\nAddress Book does not exist!\n')
+		print('\nAddress Book does not exist! Create one by adding one contact.\n')
 	else:
 		if len(unpickle) == 0:
 			print('Address Book is empty.\n')
@@ -183,6 +195,7 @@ def browse_addrbook():
 				print('\nContact Name:', each_object.name)
 				print('Contact number:', each_object.number)
 				print('Email:', each_object.email)
+				print('Tag:', each_object.tag)
 				print()
 
 def  main():
@@ -194,10 +207,19 @@ def  main():
 		elif choice == '2':
 			# check here if contact is already in dict
 			name = input('\nEnter name of the person: ')
-			number = input('Enter contact number of the person: ')
-			email = input('Enter email of the person: ')
-			Person = PersonInfo(name, number, email)
-			add_contact(Person)
+			try:
+				number = input('Enter contact number of the person: ')
+				val = int(number)
+			except ValueError:
+				print('Not a valid number! Enter number again.')
+				number = input('Enter contact number of the person: ')
+				val = int(number)
+			else:
+				number = val
+				email = input('Enter email of the person: ')
+				tag = input('Enter tag: ')
+				Person = PersonInfo(name, number, email, tag)
+				add_contact(Person)
 		elif choice == '3':
 			name = input('Name of the person to be deleted: ')
 			del_contact(name)
