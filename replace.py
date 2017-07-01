@@ -21,6 +21,7 @@ def get_arg():
 		is_silent = False
 		replace(is_silent, args.original_string, args.replacement_string, args.files)
 	else:
+		# default to silent output
 		replace(is_silent, args.original_string, args.replacement_string, args.files)
 
 def replace(is_silent, from_string, to_string, dirs):
@@ -30,17 +31,25 @@ def replace(is_silent, from_string, to_string, dirs):
 		print(to_string)
 	else:
 		for filename in dirs:
+			if not is_silent:
+				print('Modifying file', filename)
 			file_lines = list()
+			# first open file for reading in the memory
 			with open(filename, 'r') as file:
 				file.seek(0)
+				# look for word in the file line by line
 				for line in file:
 					line = line.replace(from_string, to_string)
+					# store each line in the list for later retrieval
 					file_lines.append(line)
 
+			# next open the same file for writing modified lines
 			with open(filename, 'w') as file:
 				file.seek(0)
 				for line in file_lines:
 					file.write(line)
+			if not is_silent:
+				print('Done!')
 					
 def main():
 	get_arg()	
