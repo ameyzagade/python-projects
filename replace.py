@@ -26,7 +26,7 @@ def get_arg():
 
 def replace(is_silent, from_string, to_string, dirs):
 	if (from_string is None) or (to_string is None):
-		print('error')
+		print('Orginal String or Replace String is absent.')
 	elif (len(dirs) == 0):
 		print(to_string)
 	else:
