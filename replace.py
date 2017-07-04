@@ -5,7 +5,7 @@ def get_arg():
 	''' UNIX replace command. This will replace all instances of 'from' string with 'from to' string in the mentioned file(s).
 	If the -- option is not given, replace reads the standard input and writes to the standard output.'''
 
-	__version__ = '1.0'
+	__version__ = '2'
 	parser = argparse.ArgumentParser("replace.py (-v/-s) (from_string) (to_string) ... file_name (file_name) ... ")
 	parser.add_argument('-s', action='store_true', help="Silent mode. Print less information about what the program does. Default action.")
 	parser.add_argument('-v', action='store_true', help="Verbose mode. Print more information about what the program does.")
@@ -32,25 +32,31 @@ def replace(is_silent, from_string, to_string, dirs):
 		print(to_string)
 	else:
 		for filename in dirs:
-			if not is_silent:
-				print('Modifying file', filename)
 			file_lines = list()
-			# first open file for reading in the memory
-			with open(filename, 'r') as file:
-				file.seek(0)
-				# look for word in the file line by line
-				for line in file:
-					line = re.sub(r'\b'+from_string+r'\b', to_string, line)
-					file_lines.append(line)
+			try:
+				if not is_silent:
+					print('Modifying file', filename)
 
-			# next open the same file for writing modified lines
-			with open(filename, 'w') as file:
-				file.seek(0)
-				for line in file_lines:
-					file.write(line)
-			if not is_silent:
-				print('Done!')
-					
+				# first open file for reading in the memory
+				with open(filename, 'r') as file:
+					file.seek(0)
+					# look for word in the file line by line
+					for line in file:
+						line = re.sub(r'\b'+from_string+r'\b', to_string, line)
+						file_lines.append(line)
+			# check if file do not exist and continue with next file
+			except FileNotFoundError:
+					print(filename, 'does not exist!')
+					continue
+			else:
+				# open the same file in write mode for writing modified lines
+				with open(filename, 'w') as file:
+					file.seek(0)
+					for line in file_lines:
+						file.write(line)
+				if not is_silent:
+					print('Done!')
+
 def main():
 	get_arg()	
 
