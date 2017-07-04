@@ -13,5 +13,5 @@
  Favorite teams can be changed inside the script to avail their scores.
 
 # 4. replace.py
-  A command line utility which replicates UNIX replace command. An original and replacement strings are provided, along with text file(s), to replacethe 
+  A command line utility which replicates UNIX replace command. An original and replacement strings are provided, along with text file(s), to replace the 
  original string in the file(s) with the replacement string. User can select between silent and verbose output. Default is silent output.
