@@ -1,4 +1,5 @@
 import argparse
+import re
 
 def get_arg():
 	''' UNIX replace command. This will replace all instances of 'from' string with 'from to' string in the mentioned file(s).
@@ -39,8 +40,7 @@ def replace(is_silent, from_string, to_string, dirs):
 				file.seek(0)
 				# look for word in the file line by line
 				for line in file:
-					line = line.replace(from_string, to_string)
-					# store each line in the list for later retrieval
+					line = re.sub(r'\b'+from_string+r'\b', to_string, line)
 					file_lines.append(line)
 
 			# next open the same file for writing modified lines
