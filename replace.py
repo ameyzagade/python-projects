@@ -32,11 +32,10 @@ def replace(is_silent, from_string, to_string, dirs):
 		print(to_string)
 	else:
 		for filename in dirs:
+			if not is_silent:
+			print('Modifying file', filename)
 			file_lines = list()
 			try:
-				if not is_silent:
-					print('Modifying file', filename)
-
 				# first open file for reading in the memory
 				with open(filename, 'r') as file:
 					file.seek(0)
